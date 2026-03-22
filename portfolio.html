@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Matheus Paes — Dev Java Backend</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #080c10;
+    --surface: #0d1117;
+    --surface2: #161b22;
+    --border: #21262d;
+    --accent: #00ff88;
+    --accent2: #0ea5e9;
+    --text: #e6edf3;
+    --muted: #7d8590;
+    --glow: 0 0 30px rgba(0,255,136,0.15);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  .cursor {
+    width: 12px; height: 12px;
+    background: var(--accent);
+    border-radius: 50%;
+    position: fixed; top: 0; left: 0;
+    pointer-events: none; z-index: 9999;
+    transition: transform 0.1s;
+    mix-blend-mode: screen;
+  }
+  .cursor-ring {
+    width: 36px; height: 36px;
+    border: 1px solid rgba(0,255,136,0.4);
+    border-radius: 50%;
+    position: fixed; top: 0; left: 0;
+    pointer-events: none; z-index: 9998;
+    transition: all 0.15s ease;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none; z-index: 0;
+  }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 20px 60px;
+    background: rgba(8,12,16,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo { font-family: 'JetBrains Mono', monospace; font-size: 1rem; color: var(--accent); font-weight: 600; }
+  .nav-links { display: flex; gap: 36px; list-style: none; }
+  .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.85rem; font-family: 'JetBrains Mono', monospace; transition: color 0.2s; letter-spacing: 0.05em; }
+  .nav-links a::before { content: '// '; color: var(--accent); opacity: 0.5; }
+  .nav-links a:hover { color: var(--text); }
+
+  #hero {
+    min-height: 100vh; display: flex; align-items: center;
+    padding: 120px 60px 80px; position: relative; z-index: 1;
+  }
+  .hero-inner { max-width: 900px; }
+  .hero-tag {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--accent);
+    letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 24px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .hero-tag::before { content: ''; width: 32px; height: 1px; background: var(--accent); }
+  .hero-name { font-size: clamp(3rem, 8vw, 7rem); font-weight: 800; line-height: 0.95; letter-spacing: -0.03em; margin-bottom: 16px; }
+  .hero-name .line2 { color: transparent; -webkit-text-stroke: 1px rgba(230,237,243,0.3); }
+  .hero-role { font-family: 'JetBrains Mono', monospace; font-size: 1rem; color: var(--muted); margin-bottom: 40px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .role-badge { background: var(--surface2); border: 1px solid var(--border); padding: 4px 12px; border-radius: 4px; font-size: 0.8rem; color: var(--accent2); }
+  .hero-desc { font-size: 1.05rem; color: var(--muted); line-height: 1.75; max-width: 560px; margin-bottom: 48px; }
+  .hero-cta { display: flex; gap: 16px; flex-wrap: wrap; }
+
+  .btn-primary {
+    background: var(--accent); color: var(--bg); padding: 14px 32px;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 600;
+    border: none; cursor: none; text-decoration: none; display: inline-block;
+    transition: all 0.2s; letter-spacing: 0.05em;
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+  }
+  .btn-primary:hover { background: #33ffaa; transform: translateY(-2px); box-shadow: var(--glow); }
+
+  .btn-outline {
+    background: transparent; color: var(--text); padding: 14px 32px;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
+    border: 1px solid var(--border); cursor: none; text-decoration: none;
+    display: inline-block; transition: all 0.2s; letter-spacing: 0.05em;
+  }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+  .terminal-deco {
+    position: absolute; right: 60px; top: 50%; transform: translateY(-50%);
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    width: 400px; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;
+    overflow: hidden; box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+    animation: float 6s ease-in-out infinite;
+  }
+  @keyframes float { 0%,100%{transform:translateY(-50%) translateY(0)} 50%{transform:translateY(-50%) translateY(-12px)} }
+  .terminal-header { background: var(--surface2); padding: 10px 16px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.r{background:#ff5f57} .dot.y{background:#febc2e} .dot.g{background:#28c840}
+  .terminal-title { color: var(--muted); font-size: 0.7rem; margin-left: 8px; }
+  .terminal-body { padding: 20px; line-height: 2; }
+  .t-comment{color:#6e7681} .t-keyword{color:#ff7b72} .t-string{color:#a5d6ff} .t-fn{color:#d2a8ff} .t-accent{color:var(--accent)} .t-num{color:#f2cc60}
+  .cursor-blink { display: inline-block; width: 8px; height: 14px; background: var(--accent); animation: blink 1s step-end infinite; vertical-align: middle; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  section { padding: 100px 60px; position: relative; z-index: 1; }
+  .section-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--accent);
+    letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-label::before { content: ''; width: 24px; height: 1px; background: var(--accent); }
+  .section-title { font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 60px; line-height: 1.1; }
+
+  #about { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; max-width: 1100px; }
+  .about-text p { color: var(--muted); line-height: 1.8; font-size: 1rem; margin-bottom: 18px; }
+  .about-text p strong { color: var(--text); }
+  .about-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+  .stat-box { background: var(--bg); border: 1px solid var(--border); padding: 28px; transition: border-color 0.2s; }
+  .stat-box:hover { border-color: var(--accent); }
+  .stat-num { font-size: 2.2rem; font-weight: 800; color: var(--accent); line-height: 1; margin-bottom: 6px; }
+  .stat-label { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+
+  .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 2px; max-width: 1100px; }
+  .skill-category { background: var(--surface); border: 1px solid var(--border); padding: 28px; transition: border-color 0.2s, transform 0.2s; }
+  .skill-category:hover { border-color: var(--accent); transform: translateY(-3px); }
+  .skill-cat-title { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+  .skill-cat-title::before { content: ''; width: 16px; height: 1px; background: var(--accent); }
+  .skill-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+  .skill-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; padding: 5px 12px; border-radius: 3px; border: 1px solid var(--border); color: var(--muted); transition: all 0.2s; }
+  .skill-tag:hover { border-color: var(--accent); color: var(--accent); background: rgba(0,255,136,0.05); }
+
+  #projects { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 2px; max-width: 1100px; }
+  .project-card { background: var(--bg); border: 1px solid var(--border); padding: 36px; transition: all 0.25s; position: relative; overflow: hidden; }
+  .project-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--accent), var(--accent2)); transform: scaleX(0); transform-origin: left; transition: transform 0.3s; }
+  .project-card:hover { border-color: rgba(0,255,136,0.3); transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+  .project-card:hover::before { transform: scaleX(1); }
+  .project-num { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--muted); margin-bottom: 16px; opacity: 0.5; }
+  .project-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.01em; }
+  .project-desc { color: var(--muted); font-size: 0.9rem; line-height: 1.65; margin-bottom: 20px; }
+  .project-features { margin-bottom: 20px; display: flex; flex-direction: column; gap: 6px; }
+  .project-feature { font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--muted); display: flex; align-items: flex-start; gap: 8px; }
+  .project-feature::before { content: '→'; color: var(--accent); flex-shrink: 0; }
+  .project-stack { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 28px; }
+  .stack-badge { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; padding: 3px 8px; background: var(--surface2); border: 1px solid var(--border); color: var(--accent2); border-radius: 3px; }
+  .project-links { display: flex; gap: 16px; }
+  .project-link { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--muted); text-decoration: none; display: flex; align-items: center; gap: 6px; transition: color 0.2s; }
+  .project-link:hover { color: var(--accent); }
+  .project-link svg { width: 14px; height: 14px; }
+
+  .contact-inner { max-width: 700px; }
+  .contact-desc { color: var(--muted); font-size: 1.05rem; line-height: 1.7; margin-bottom: 48px; }
+  .contact-links { display: flex; flex-direction: column; gap: 2px; max-width: 520px; }
+  .contact-item { display: flex; align-items: center; justify-content: space-between; padding: 20px 28px; background: var(--surface); border: 1px solid var(--border); text-decoration: none; color: var(--text); transition: all 0.2s; }
+  .contact-item:hover { border-color: var(--accent); background: rgba(0,255,136,0.03); padding-left: 36px; }
+  .contact-item-left { display: flex; align-items: center; gap: 16px; }
+  .contact-icon { width: 36px; height: 36px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--accent); }
+  .contact-platform { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 2px; }
+  .contact-handle { font-size: 0.95rem; font-weight: 600; }
+  .contact-arrow { color: var(--muted); transition: transform 0.2s, color 0.2s; }
+  .contact-item:hover .contact-arrow { transform: translateX(4px); color: var(--accent); }
+
+  footer { padding: 40px 60px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 1; }
+  footer p { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--muted); }
+  footer span { color: var(--accent); }
+
+  .fade-up { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 900px) {
+    nav { padding: 16px 24px; }
+    .nav-links { display: none; }
+    #hero { padding: 120px 24px 80px; }
+    .terminal-deco { display: none; }
+    section { padding: 80px 24px; }
+    .about-grid { grid-template-columns: 1fr; gap: 48px; }
+    footer { padding: 32px 24px; flex-direction: column; gap: 12px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<nav>
+  <div class="nav-logo">~/matheus-paes<span style="color:var(--muted)">$</span></div>
+  <ul class="nav-links">
+    <li><a href="#about">sobre</a></li>
+    <li><a href="#skills">skills</a></li>
+    <li><a href="#projects">projetos</a></li>
+    <li><a href="#contact">contato</a></li>
+  </ul>
+</nav>
+
+<section id="hero">
+  <div class="hero-inner">
+    <div class="hero-tag">Aberto a oportunidades · Java Dev Júnior</div>
+    <h1 class="hero-name">
+      Matheus<br>
+      <span class="line2">Paes</span>
+    </h1>
+    <div class="hero-role">
+      <span class="role-badge">Java</span>
+      <span class="role-badge">Spring Boot</span>
+      <span class="role-badge">Backend Dev</span>
+      <span style="color:var(--muted)">// em formação, em evolução</span>
+    </div>
+    <p class="hero-desc">
+      Desenvolvedor backend em formação, cursando Análise e Desenvolvimento de Sistemas. Foco no ecossistema Java e Spring — construindo APIs REST robustas, seguras e bem estruturadas.
+    </p>
+    <div class="hero-cta">
+      <a href="#projects" class="btn-primary">ver projetos</a>
+      <a href="#contact" class="btn-outline">entrar em contato</a>
+    </div>
+  </div>
+
+  <div class="terminal-deco">
+    <div class="terminal-header">
+      <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+      <span class="terminal-title">matheus-paes.java — backend</span>
+    </div>
+    <div class="terminal-body">
+      <div class="t-comment">// quem é esse dev?</div>
+      <div><span class="t-keyword">class</span> <span class="t-fn">MatheusPaes</span> {</div>
+      <div style="padding-left:16px">
+        <div><span class="t-string">"formação"</span>: <span class="t-accent">"ADS"</span>,</div>
+        <div><span class="t-string">"foco"</span>: <span class="t-accent">"Java Backend"</span>,</div>
+        <div><span class="t-string">"anterior"</span>: <span class="t-accent">"PHP / Laravel"</span>,</div>
+        <div><span class="t-string">"stack"</span>: [</div>
+        <div style="padding-left:16px">
+          <span class="t-accent">"Spring Boot"</span>, <span class="t-accent">"Security"</span>,<br>
+          <span class="t-accent">"JPA"</span>, <span class="t-accent">"PostgreSQL"</span>, <span class="t-accent">"Docker"</span>
+        </div>
+        <div>],</div>
+        <div><span class="t-string">"status"</span>: <span class="t-fn">buscandoOportunidade</span>()</div>
+      </div>
+      <div>}</div>
+      <div style="margin-top:12px"><span class="t-accent">$</span> <span class="t-comment">build em andamento...</span><span class="cursor-blink"></span></div>
+    </div>
+  </div>
+</section>
+
+<section id="about">
+  <div class="about-grid fade-up">
+    <div class="about-text">
+      <div class="section-label">Sobre mim</div>
+      <h2 class="section-title">Backend<br>com propósito.</h2>
+      <p>Olá! Sou <strong>Matheus Paes</strong>, desenvolvedor backend em formação com foco em <strong>Java e Spring</strong>. Gosto de código limpo, arquitetura bem pensada e sistemas que crescem sem quebrar.</p>
+      <p>Antes de mergulhar no ecossistema Java, trabalhei com <strong>PHP e Laravel</strong> — o que me deu base sólida em CRUDs, versionamento, documentação de APIs com Swagger e manutenção de sistemas reais. Essa experiência acelera minha curva de aprendizado no mundo Java.</p>
+      <p>Tenho perfil organizado, aprendo rápido e gosto de colaborar. Busco minha primeira oportunidade como <strong>Java Dev Júnior</strong> para evoluir e contribuir com soluções backend escaláveis.</p>
+    </div>
+    <div class="about-stats">
+      <div class="stat-box">
+        <div class="stat-num">1.5+</div>
+        <div class="stat-label">Anos com PHP/Laravel</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">4+</div>
+        <div class="stat-label">Projetos entregues</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">ADS</div>
+        <div class="stat-label">Em formação</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">∞</div>
+        <div class="stat-label">Vontade de aprender</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="skills">
+  <div class="section-label">Stack técnica</div>
+  <h2 class="section-title">O que eu uso.</h2>
+  <div class="skills-grid fade-up">
+    <div class="skill-category">
+      <div class="skill-cat-title">Java & Spring</div>
+      <div class="skill-tags">
+        <span class="skill-tag">Java 17</span>
+        <span class="skill-tag">Spring Boot</span>
+        <span class="skill-tag">Spring MVC</span>
+        <span class="skill-tag">Spring Security</span>
+        <span class="skill-tag">Spring Data JPA</span>
+      </div>
+    </div>
+    <div class="skill-category">
+      <div class="skill-cat-title">Banco de Dados</div>
+      <div class="skill-tags">
+        <span class="skill-tag">PostgreSQL</span>
+        <span class="skill-tag">MySQL</span>
+        <span class="skill-tag">JPA / Hibernate</span>
+        <span class="skill-tag">DTOs</span>
+      </div>
+    </div>
+    <div class="skill-category">
+      <div class="skill-cat-title">APIs & Segurança</div>
+      <div class="skill-tags">
+        <span class="skill-tag">REST</span>
+        <span class="skill-tag">JWT + RSA</span>
+        <span class="skill-tag">OAuth2</span>
+        <span class="skill-tag">Swagger / OpenAPI</span>
+      </div>
+    </div>
+    <div class="skill-category">
+      <div class="skill-cat-title">Testes</div>
+      <div class="skill-tags">
+        <span class="skill-tag">JUnit</span>
+        <span class="skill-tag">Mockito</span>
+      </div>
+    </div>
+    <div class="skill-category">
+      <div class="skill-cat-title">DevOps & Ferramentas</div>
+      <div class="skill-tags">
+        <span class="skill-tag">Docker</span>
+        <span class="skill-tag">Git</span>
+        <span class="skill-tag">GitHub</span>
+        <span class="skill-tag">Maven</span>
+      </div>
+    </div>
+    <div class="skill-category">
+      <div class="skill-cat-title">Background PHP</div>
+      <div class="skill-tags">
+        <span class="skill-tag">PHP</span>
+        <span class="skill-tag">Laravel</span>
+        <span class="skill-tag">Symfony</span>
+        <span class="skill-tag">Doctrine ORM</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="projects">
+  <div class="section-label">Projetos</div>
+  <h2 class="section-title">O que já construí.</h2>
+  <div class="projects-grid fade-up">
+
+    <div class="project-card">
+      <div class="project-num">001</div>
+      <div class="project-title">Stock Alert SaaS</div>
+      <p class="project-desc">SaaS de monitoramento de ações da bolsa com alertas em tempo real via WhatsApp. Consulta preços automaticamente e notifica quando o ativo atinge o preço-alvo.</p>
+      <div class="project-features">
+        <span class="project-feature">Alertas configuráveis por preço-alvo e condição (acima/abaixo)</span>
+        <span class="project-feature">Notificação via WhatsApp com Twilio API</span>
+        <span class="project-feature">Login com Google via OAuth2</span>
+        <span class="project-feature">Scheduler automático de verificação de cotações</span>
+        <span class="project-feature">Integração com API Brapi para dados do mercado</span>
+      </div>
+      <div class="project-stack">
+        <span class="stack-badge">Java 17</span>
+        <span class="stack-badge">Spring Boot</span>
+        <span class="stack-badge">Spring Security</span>
+        <span class="stack-badge">OAuth2</span>
+        <span class="stack-badge">Twilio</span>
+        <span class="stack-badge">PostgreSQL</span>
+        <span class="stack-badge">Docker</span>
+      </div>
+      <div class="project-links">
+        <a href="https://github.com/paesdv" target="_blank" class="project-link">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          GitHub
+        </a>
+      </div>
+    </div>
+
+    <div class="project-card">
+      <div class="project-num">002</div>
+      <div class="project-title">Mini Twitter API</div>
+      <p class="project-desc">API REST inspirada no Twitter para aprofundar Spring Security. Autenticação stateless com JWT assinado por RSA e controle de acesso por roles.</p>
+      <div class="project-features">
+        <span class="project-feature">Cadastro e login com geração de token JWT (RSA)</span>
+        <span class="project-feature">Criação de tweets autenticados e feed paginado</span>
+        <span class="project-feature">Controle de acesso por roles (USER / ADMIN)</span>
+        <span class="project-feature">Exclusão de tweets com verificação de permissão</span>
+      </div>
+      <div class="project-stack">
+        <span class="stack-badge">Java 17</span>
+        <span class="stack-badge">Spring Boot</span>
+        <span class="stack-badge">Spring Security</span>
+        <span class="stack-badge">JWT + RSA</span>
+        <span class="stack-badge">JPA / Hibernate</span>
+        <span class="stack-badge">MySQL</span>
+        <span class="stack-badge">Docker</span>
+      </div>
+      <div class="project-links">
+        <a href="https://github.com/paesdv" target="_blank" class="project-link">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          GitHub
+        </a>
+      </div>
+    </div>
+
+    <div class="project-card">
+      <div class="project-num">003</div>
+      <div class="project-title">CRUDs PHP — Laravel & Symfony</div>
+      <p class="project-desc">Projetos desenvolvidos com PHP cobrindo fundamentos de backend: rotas, controllers, models, migrations, autenticação e persistência. Base que facilita a adaptação ao ecossistema Java.</p>
+      <div class="project-features">
+        <span class="project-feature">CRUD completo com Laravel (padrão MVC)</span>
+        <span class="project-feature">CRUD com Symfony e Doctrine ORM</span>
+        <span class="project-feature">Documentação de rotas com Swagger/OpenAPI</span>
+        <span class="project-feature">Versionamento e manutenção com Git</span>
+      </div>
+      <div class="project-stack">
+        <span class="stack-badge">PHP</span>
+        <span class="stack-badge">Laravel</span>
+        <span class="stack-badge">Symfony</span>
+        <span class="stack-badge">Doctrine</span>
+        <span class="stack-badge">MySQL</span>
+        <span class="stack-badge">Swagger</span>
+      </div>
+      <div class="project-links">
+        <a href="https://github.com/paesdv" target="_blank" class="project-link">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          GitHub
+        </a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section id="contact">
+  <div class="contact-inner fade-up">
+    <div class="section-label">Contato</div>
+    <h2 class="section-title">Vamos<br>conversar?</h2>
+    <p class="contact-desc">Estou em busca da minha primeira oportunidade como desenvolvedor Java Júnior. Se você tem uma vaga, um projeto ou só quer trocar uma ideia sobre tecnologia, me chama!</p>
+    <div class="contact-links">
+      <a href="https://linkedin.com/in/paesdv" target="_blank" class="contact-item">
+        <div class="contact-item-left">
+          <div class="contact-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+          </div>
+          <div>
+            <div class="contact-platform">LinkedIn</div>
+            <div class="contact-handle">linkedin.com/in/paesdv</div>
+          </div>
+        </div>
+        <div class="contact-arrow">→</div>
+      </a>
+      <a href="https://github.com/paesdv" target="_blank" class="contact-item">
+        <div class="contact-item-left">
+          <div class="contact-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          </div>
+          <div>
+            <div class="contact-platform">GitHub</div>
+            <div class="contact-handle">github.com/paesdv</div>
+          </div>
+        </div>
+        <div class="contact-arrow">→</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>Feito com <span>♥</span> e muito <span>Java</span> — 2025</p>
+  <p>Matheus Paes <span>//</span> Backend Developer</p>
+</footer>
+
+<script>
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx - 6 + 'px';
+    cursor.style.top = my - 6 + 'px';
+  });
+
+  function animRing() {
+    rx += (mx - rx - 18) * 0.12;
+    ry += (my - ry - 18) * 0.12;
+    ring.style.left = rx + 'px';
+    ring.style.top = ry + 'px';
+    requestAnimationFrame(animRing);
+  }
+  animRing();
+
+  document.querySelectorAll('a, button').forEach(el => {
+    el.addEventListener('mouseenter', () => { cursor.style.transform = 'scale(2)'; ring.style.transform = 'scale(1.5)'; });
+    el.addEventListener('mouseleave', () => { cursor.style.transform = 'scale(1)'; ring.style.transform = 'scale(1)'; });
+  });
+
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
